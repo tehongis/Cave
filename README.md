@@ -8,5 +8,5 @@ ideas so far:
   - Simple physics engine with rope/tractorbeam features
   - Store to sell parts and buy upgrades for ship
   - PS4 / xbox joystick support (dualstick controls -> direction and thusters, rope/tractorbeam control)
-  - Multiples caves/planets to scavenge from
+  - Multiple caves/planets to scavenge from
   

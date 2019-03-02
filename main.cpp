@@ -1,18 +1,56 @@
-#include <iostream>
+// Code by Tero Hongisto.
+// Release under MIT license.
 
-#include <Box2D/Box2D.h>
+#include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
+#include <Box2D/Box2D.h>
+
+#define TICK_INTERVAL    50
 
 using namespace std;
 
+static Uint32 next_time;
+
+Uint32 time_left(void)
+{
+		Uint32 now;
+
+		now = SDL_GetTicks();
+		if(next_time <= now)
+				return 0;
+		else
+				return next_time - now;
+}
+
+
 int main() {
 
-	SDL_Window * window;
+	SDL_Window *window = NULL;
+	SDL_Event event;
+	SDL_Texture *texture = NULL;
+	SDL_Surface *surface = NULL;
+  SDL_Renderer *renderer = NULL;
+
+	bool RUNNING = false;
 
 	SDL_Init(SDL_INIT_VIDEO);
 
+
+
+
 	window = SDL_CreateWindow("Cave",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,800,600,SDL_WINDOW_OPENGL);
+  renderer = SDL_CreateRenderer(window, -1, 0);
+
+	const char *filename = "graphics/JEROM_spaceships0_CC-BY-3.png";
+	surface = IMG_Load( filename );
+	texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+		if (texture == NULL) {
+			printf("Could not load texture: %s\n", SDL_GetError());
+			return EXIT_FAILURE;
+		}
 
     // Check that the window was successfully created
     if (window == NULL) {
@@ -21,9 +59,35 @@ int main() {
         return 1;
     }
 
-    // The window is open: could enter program loop here (see SDL_PollEvent())
+		next_time = SDL_GetTicks() + TICK_INTERVAL;
 
-    SDL_Delay(3000);  // Pause execution for 3000 milliseconds, for example
+		RUNNING=true;
+		while(RUNNING) {
+
+			// Get the next event
+
+			if (SDL_PollEvent(&event)) {
+				if (event.type == SDL_QUIT) {
+					RUNNING=false;
+				}
+			}
+
+        /* Select the color for drawing. It is set to red here. */
+        SDL_SetRenderDrawColor(renderer, 25, 35, 65, 255);
+
+        /* Clear the entire screen to our selected color. */
+        SDL_RenderClear(renderer);
+				//Render background
+				SDL_RenderCopy(renderer, texture, NULL, NULL);
+				/* render the current animation step of our shape */
+	      //SDL_RenderCopy(Main_Renderer, BlueShapes, &SrcR, &DestR);
+	        SDL_RenderPresent(renderer);
+					SDL_Delay(time_left());
+	        next_time += TICK_INTERVAL;
+						}
+
+		// Destroy texture
+		SDL_DestroyTexture(texture);
 
     // Close and destroy the window
     SDL_DestroyWindow(window);
@@ -31,6 +95,5 @@ int main() {
     // Clean up
     SDL_Quit();
 
-	cout << "Toimi!" << endl;
-	return 0;
+	return EXIT_SUCCESS;
 }

@@ -1,3 +1,2 @@
 Cave	:	main.cpp
-	g++ -o Cave main.cpp -lSDL2 -lBox2D
-
+	g++ -g -Wall -pedantic main.cpp -o Cave -lSDL2 -lSDL2_image -lBox2D
