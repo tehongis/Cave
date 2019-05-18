@@ -12,6 +12,7 @@
 using namespace std;
 
 static Uint32 next_time;
+const Uint8 *keys;
 
 Uint32 time_left(void)
 {
@@ -24,6 +25,23 @@ Uint32 time_left(void)
 				return next_time - now;
 }
 
+class GObject {
+
+	double x;
+	double y;
+
+	private:	
+    //Default Constructor 
+    GObject(int xpos,int ypos) 
+    { 
+        x = static_cast<double>(xpos);  
+        y = static_cast<double>(ypos);
+    }
+
+	void draw() {
+		//blit to screen and x and y
+	};
+};
 
 int main() {
 
@@ -36,9 +54,6 @@ int main() {
 	bool RUNNING = false;
 
 	SDL_Init(SDL_INIT_VIDEO);
-
-
-
 
 	window = SDL_CreateWindow("Cave",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,800,600,SDL_WINDOW_OPENGL);
   renderer = SDL_CreateRenderer(window, -1, 0);
@@ -72,7 +87,7 @@ int main() {
 				}
 			}
 
-		const Uint8 *keys = SDL_GetKeyboardState(NULL);
+		keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			 RUNNING=false;
     		printf("Exiting.\n");
