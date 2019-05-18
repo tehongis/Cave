@@ -72,6 +72,12 @@ int main() {
 				}
 			}
 
+		const Uint8 *keys = SDL_GetKeyboardState(NULL);
+		if (keys[SDL_SCANCODE_ESCAPE]) {
+			 RUNNING=false;
+    		printf("Exiting.\n");
+		}
+
         /* Select the color for drawing. It is set to red here. */
         SDL_SetRenderDrawColor(renderer, 25, 35, 65, 255);
 
