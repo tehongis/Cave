@@ -55,16 +55,9 @@ int main() {
   SDL_Renderer *renderer = NULL;
 
 	bool RUNNING = false;
-
-// start SDL with audio support
-if(SDL_Init(SDL_INIT_VIDEO)==-1) {
-    printf("SDL_Init: %s\n", SDL_GetError());
-    exit(1);
-}
-
-	 	
-// start SDL with audio support
-if(SDL_Init(SDL_INIT_AUDIO)==-1) {
+ 	
+// start SDL with video and audio support
+if(SDL_Init( SDL_INIT_VIDEO |  SDL_INIT_AUDIO ) == -1) {
     printf("SDL_Init: %s\n", SDL_GetError());
     exit(1);
 }
