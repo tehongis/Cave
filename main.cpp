@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <Box2D/Box2D.h>
 
 #define TICK_INTERVAL    50
@@ -13,6 +14,8 @@ using namespace std;
 
 static Uint32 next_time;
 const Uint8 *keys;
+
+static const char *GAMEMUSIC_MP3 = "music/chabee_-_Stardust_Memories.mp3";
 
 Uint32 time_left(void)
 {
@@ -53,7 +56,20 @@ int main() {
 
 	bool RUNNING = false;
 
-	SDL_Init(SDL_INIT_VIDEO);
+// start SDL with audio support
+if(SDL_Init(SDL_INIT_VIDEO)==-1) {
+    printf("SDL_Init: %s\n", SDL_GetError());
+    exit(1);
+}
+
+	 	
+// start SDL with audio support
+if(SDL_Init(SDL_INIT_AUDIO)==-1) {
+    printf("SDL_Init: %s\n", SDL_GetError());
+    exit(1);
+}
+
+    Mix_OpenAudio( MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);
 
 	window = SDL_CreateWindow("Cave",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,800,600,SDL_WINDOW_OPENGL);
   renderer = SDL_CreateRenderer(window, -1, 0);
@@ -73,8 +89,11 @@ int main() {
         printf("Could not create window: %s\n", SDL_GetError());
         return 1;
     }
-
+    Mix_Music *music = Mix_LoadMUS(GAMEMUSIC_MP3);
+ 
 		next_time = SDL_GetTicks() + TICK_INTERVAL;
+
+	   Mix_PlayMusic(music, 1);
 
 		RUNNING=true;
 		while(RUNNING) {
