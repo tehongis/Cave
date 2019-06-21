@@ -14,7 +14,6 @@
 
 using namespace std;
 
-
 static const char *nameMusic = "music/Stardrive.mp3";
 static const char *nameBackground = "graphics/Aurora.jpg";
 static const char *nameBox = "graphics/RTS_Crate.png";
