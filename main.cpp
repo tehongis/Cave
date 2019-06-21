@@ -2,6 +2,7 @@
 // Release under MIT license.
 
 #include <iostream>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
@@ -9,15 +10,26 @@
 #include <Box2D/Box2D.h>
 
 #define TICK_INTERVAL    50
+#define TWO_M_PI           3.14159265358979323846*2  /* pi */
 
 using namespace std;
 
+
+static const char *nameMusic = "music/Stardrive.mp3";
+static const char *nameBackground = "graphics/Aurora.jpg";
+static const char *nameBox = "graphics/RTS_Crate.png";
+static const char *nameShip = "graphics/Ship_A.png";
+
 static Uint32 next_time;
-const Uint8 *keys;
+static const Uint8 *keys;
+//The gWindow gRenderer
+static SDL_Renderer* gRenderer = NULL;
+static SDL_Texture *textureBackground = NULL;
+static SDL_Texture *textureShip = NULL;
+static SDL_Texture *textureBox = NULL;
 
-static const char *GAMEMUSIC_MP3 = "music/chabee_-_Stardust_Memories.mp3";
-
-Uint32 time_left(void)
+static double angle = 0.0;
+static Uint32 time_left(void)
 {
 		Uint32 now;
 
@@ -43,16 +55,42 @@ class GObject {
 
 	void draw() {
 		//blit to screen and x and y
-	};
+	}
 };
+
+
+
+static SDL_Texture* loadTexture( std::string path )
+{
+    //The final texture
+    SDL_Texture* newTexture = NULL;
+
+    //Load image at specified path
+    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
+    if( loadedSurface == NULL )
+    {
+        printf( "Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError() );
+    }
+    else
+    {
+        //Create texture from surface pixels
+        newTexture = SDL_CreateTextureFromSurface( gRenderer, loadedSurface );
+        if( newTexture == NULL )
+        {
+            printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
+        }
+
+        //Get rid of old loaded surface
+        SDL_FreeSurface( loadedSurface );
+    }
+
+    return newTexture;
+}
 
 int main() {
 
-	SDL_Window *window = NULL;
+	SDL_Window *gWindow = NULL;
 	SDL_Event event;
-	SDL_Texture *texture = NULL;
-	SDL_Surface *surface = NULL;
-  SDL_Renderer *renderer = NULL;
 
 	bool RUNNING = false;
  	
@@ -64,25 +102,20 @@ if(SDL_Init( SDL_INIT_VIDEO |  SDL_INIT_AUDIO ) == -1) {
 
     Mix_OpenAudio( MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);
 
-	window = SDL_CreateWindow("Cave",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,800,600,SDL_WINDOW_OPENGL);
-  renderer = SDL_CreateRenderer(window, -1, 0);
+	gWindow = SDL_CreateWindow("Cave",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,800,600,SDL_WINDOW_OPENGL);
+    gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED );
 
-	const char *filename = "graphics/JEROM_spaceships0_CC-BY-3.png";
-	surface = IMG_Load( filename );
-	texture = SDL_CreateTextureFromSurface(renderer, surface);
+	textureBackground = loadTexture(nameBackground);
+	textureShip = loadTexture(nameShip);
+	textureBox = loadTexture(nameBox);
 
-		if (texture == NULL) {
-			printf("Could not load texture: %s\n", SDL_GetError());
-			return EXIT_FAILURE;
-		}
-
-    // Check that the window was successfully created
-    if (window == NULL) {
-        // In the case that the window could not be made...
-        printf("Could not create window: %s\n", SDL_GetError());
+    // Check that the gWindow was successfully created
+    if (gWindow == NULL) {
+        // In the case that the gWindow could not be made...
+        printf("Could not create gWindow: %s\n", SDL_GetError());
         return 1;
     }
-    Mix_Music *music = Mix_LoadMUS(GAMEMUSIC_MP3);
+    Mix_Music *music = Mix_LoadMUS(nameMusic);
  
 		next_time = SDL_GetTicks() + TICK_INTERVAL;
 
@@ -105,25 +138,39 @@ if(SDL_Init( SDL_INIT_VIDEO |  SDL_INIT_AUDIO ) == -1) {
     		printf("Exiting.\n");
 		}
 
-        /* Select the color for drawing. It is set to red here. */
-        SDL_SetRenderDrawColor(renderer, 25, 35, 65, 255);
+		//Render background
+		SDL_RenderCopy(gRenderer, textureBackground, NULL, NULL);
+		//Set rendering space and render to screen
+		int x = 30;
+		int y = 40;
+		int mWidth = 64;
+		int mHeight = 64;
 
-        /* Clear the entire screen to our selected color. */
-        SDL_RenderClear(renderer);
-				//Render background
-				SDL_RenderCopy(renderer, texture, NULL, NULL);
-				/* render the current animation step of our shape */
+    	SDL_Rect renderQuad = { x, y, mWidth, mHeight };
+		//Render ship to screen
+	    SDL_RenderCopyEx( gRenderer, textureShip, NULL, &renderQuad, angle, NULL, SDL_FLIP_NONE );
+
 	      //SDL_RenderCopy(Main_Renderer, BlueShapes, &SrcR, &DestR);
-	        SDL_RenderPresent(renderer);
+	        SDL_RenderPresent(gRenderer);
 					SDL_Delay(time_left());
 	        next_time += TICK_INTERVAL;
-						}
+		
+		angle = angle + 1;
+		if (angle > 360.0) {
+			angle = angle - 360.0;
+		}
+	}
 
 		// Destroy texture
-		SDL_DestroyTexture(texture);
+		SDL_DestroyTexture(textureBackground);
+		textureBackground = NULL;
+		SDL_DestroyTexture(textureShip);
+		textureShip = NULL;
+		SDL_DestroyTexture(textureBox);
+		textureBox = NULL;
 
-    // Close and destroy the window
-    SDL_DestroyWindow(window);
+    // Close and destroy the gWindow
+    SDL_DestroyWindow(gWindow);
 
     // Clean up
     SDL_Quit();
