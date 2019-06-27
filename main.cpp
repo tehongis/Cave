@@ -10,7 +10,7 @@
 #include <Box2D/Box2D.h>
 
 #define TICK_INTERVAL    50
-#define TWO_M_PI           3.14159265358979323846*2  /* pi */
+
 
 using namespace std;
 
@@ -39,25 +39,29 @@ static Uint32 time_left(void)
 				return next_time - now;
 }
 
-class GObject {
+class gObject {
 
-	double x;
-	double y;
-
+	double myX;
+	double myY;
+   
+        double myAngle;
+        double myMomentum;
+   
+        SDL_Texture *myTexture = NULL;
+   
 	private:	
     //Default Constructor 
-    GObject(int xpos,int ypos) 
+    gObject(int xpos,int ypos, double angle) 
     { 
-        x = static_cast<double>(xpos);  
-        y = static_cast<double>(ypos);
+        myX = static_cast<double>(xpos);  
+        myY = static_cast<double>(ypos);
+        myAngle = angle;
     }
 
 	void draw() {
 		//blit to screen and x and y
 	}
 };
-
-
 
 static SDL_Texture* loadTexture( std::string path )
 {
@@ -101,7 +105,7 @@ if(SDL_Init( SDL_INIT_VIDEO |  SDL_INIT_AUDIO ) == -1) {
 
     Mix_OpenAudio( MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048);
 
-	gWindow = SDL_CreateWindow("Cave",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,800,600,SDL_WINDOW_OPENGL);
+	gWindow = SDL_CreateWindow("Cave",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1024,768,SDL_WINDOW_OPENGL);
     gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED );
 
 	textureBackground = loadTexture(nameBackground);
@@ -147,7 +151,7 @@ if(SDL_Init( SDL_INIT_VIDEO |  SDL_INIT_AUDIO ) == -1) {
 
     	SDL_Rect renderQuad = { x, y, mWidth, mHeight };
 		//Render ship to screen
-	    SDL_RenderCopyEx( gRenderer, textureShip, NULL, &renderQuad, angle, NULL, SDL_FLIP_NONE );
+	    SDL_RenderCopyEx( gRenderer, textureBox, NULL, &renderQuad, angle, NULL, SDL_FLIP_NONE );
 
 	      //SDL_RenderCopy(Main_Renderer, BlueShapes, &SrcR, &DestR);
 	        SDL_RenderPresent(gRenderer);
