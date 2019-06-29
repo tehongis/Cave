@@ -127,6 +127,9 @@ int main()
 		exit(1);
 	}
 
+
+	printf("Joysticks: %d\n", SDL_NumJoysticks());
+	
 	// Check for joystick
 	if (SDL_NumJoysticks() > 0)
 	{
