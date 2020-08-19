@@ -5,10 +5,18 @@ import random
 import pygame
 from pygame.locals import *
 
-BG_COLOR = (25,33,48)
-SC_SIZE = (1920,1080)
-SC_FLAGS = pygame.FULLSCREEN
-SC_BITS = 32
+sc_size = (1920,1200)
+#sc_flags = pygame.FULLSCREEN
+sc_flags = 0
+sc_bits = 32
+
+colormap = (
+        (0xAB614E,0x2F373E,0x3D5A79,0x5385BB,0xA8BD9C),
+        (0x9E7152,0x64585A,0x363E41,0x7A838A,0xCED0CB),
+        (0x4C97A4,0x16342C,0x148739,0x1EB735,0x9EC5BF),
+        (0x212426,0x5E3936,0x997764,0xC9B3A8,0xE1D4C7),
+        (0xd8add9,0x9eafa5,0x889573,0xa1754c,0x001803)
+)
 
 class Spit():
     loc = [0,0]
@@ -33,6 +41,9 @@ class Spit():
         pygame.draw.line(screen,self.color,self.loc,self.loc,1)
     
 
+class obj:
+    def _init_(self):
+        pass
 
 def rot_center(image, angle):
     """rotate an image while keeping its center and size - Needs square images"""
@@ -43,13 +54,18 @@ def rot_center(image, angle):
     rot_image = rot_image.subsurface(rot_rect).copy()
     return rot_image
 
+def lerp(a,b,t):
+    return ( a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, a.a + (b.a - a.a) * t )
+
 spits = []
 
 try:
     pygame.init()
     pygame.mixer.init()
-    screen=pygame.display.set_mode(SC_SIZE,SC_FLAGS,SC_BITS)
+    screen=pygame.display.set_mode(sc_size,sc_flags,sc_bits)
     screen_rect=screen.get_rect()
+    scx = screen.get_width() / 2 
+    scy = screen.get_height() / 2 
 
     pygame.mixer.music.load(os.path.join('music','fsm-team-escp-quasarise.mp3'))
     pygame.mixer.music.play(loops=-1)
@@ -75,10 +91,16 @@ try:
         if rot > 360:
             rot = rot - 360
 
-        screen.fill(BG_COLOR)
+        screen.fill( colormap[0][0] )
+
+        colorfrom = pygame.Color( colormap[0][2] )
+        colorto = pygame.Color( colormap[0][3] )
+        for count in range(0,512):
+            lerpcolor = lerp(colorfrom,colorto,count/512)
+            pygame.draw.line(screen,lerpcolor,(scx-256+count,0),(scx-256+count,scy*2))
+
         maptiles_rect.center = screen_rect.center
         screen.blit(maptiles, [0,0])
-
         
         for spit in spits:
             spit.draw(screen)
