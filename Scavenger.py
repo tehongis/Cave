@@ -24,15 +24,19 @@ class Spit():
     def __init__(self,loc,angle):
         angle = math.radians(angle + 45 ) + (0.5 - random.random())/2
         self.loc = list(loc)
-        self.speed = [ (math.sin(angle) - math.cos(angle) ) , (math.cos(angle) + math.sin(angle) ) ]
-        self.life = 128 + random.randint(0,32)
+        self.lastloc = list(loc)
+        self.speed = [ 3 * (math.sin(angle) - math.cos(angle) ) , 3 * (math.cos(angle) + math.sin(angle) ) ]
+        self.life = 64 + random.randint(0,32)
         self.color = (255,255,255)
 
     def move(self):
+        self.lastloc[0] = self.loc[0]
+        self.lastloc[1] = self.loc[1]
         self.loc[0] = self.loc[0] + self.speed[0]
         self.loc[1] = self.loc[1] + self.speed[1]
         self.speed[0] = self.speed[0] * 0.999
         self.speed[1] = self.speed[1] * 0.999
+        self.color = (255,255,255,255-self.life)
         self.life = self.life - 1
         if self.life < 0:
             return(-1)
@@ -40,7 +44,7 @@ class Spit():
             return(0)
     
     def draw(self,screen):
-        pygame.draw.rect(screen,self.color,(self.loc,(2,2)))
+        pygame.draw.line(screen,self.color,self.lastloc,self.loc,2)
     
 
 class obj:
