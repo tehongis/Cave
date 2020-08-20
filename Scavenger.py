@@ -20,26 +20,27 @@ colormap = (
 )
 
 class Spit():
-    loc = [0,0]
 
-    def __init__(self,loc,direction):
-        self.direction = direction
-        self.loc[0] = loc[0]
-        self.loc[1] = loc[1]
-        self.loc[0] = self.loc[0] + (32 * math.sin(direction) - 32 * math.cos(direction) )
-        self.loc[1] = self.loc[1] + (32 * math.cos(direction) + 32 * math.sin(direction) )
-        self.life = 32
+    def __init__(self,loc,angle):
+        angle = math.radians(angle + 45 ) + (0.5 - random.random())/2
+        self.loc = list(loc)
+        self.speed = [ (math.sin(angle) - math.cos(angle) ) , (math.cos(angle) + math.sin(angle) ) ]
+        self.life = 128 + random.randint(0,32)
         self.color = (255,255,255)
 
     def move(self):
-        self.loc[0] = self.loc[0] + math.sin(direction) - math.cos(direction)
-        self.loc[1] = self.loc[1] + math.cos(direction) + math.sin(direction)
+        self.loc[0] = self.loc[0] + self.speed[0]
+        self.loc[1] = self.loc[1] + self.speed[1]
+        self.speed[0] = self.speed[0] * 0.999
+        self.speed[1] = self.speed[1] * 0.999
         self.life = self.life - 1
         if self.life < 0:
-            del self
+            return(-1)
+        else:
+            return(0)
     
     def draw(self,screen):
-        pygame.draw.line(screen,self.color,self.loc,self.loc,1)
+        pygame.draw.rect(screen,self.color,(self.loc,(2,2)))
     
 
 class obj:
@@ -68,8 +69,8 @@ try:
     screen=pygame.display.set_mode(sc_size,sc_flags,sc_bits)
 
     screen_rect=screen.get_rect()
-    scx = screen.get_width() / 2 
-    scy = screen.get_height() / 2 
+    scx = int( screen.get_width() / 2 )
+    scy = int( screen.get_height() / 2 )
 
     pygame.mixer.music.load(os.path.join('music','fsm-team-escp-quasarise.mp3'))
     pygame.mixer.music.play(loops=-1)
@@ -95,7 +96,7 @@ try:
         if rot > 360:
             rot = rot - 360
 
-        screen.fill( colormap[0][0] )
+        screen.fill( colormap[0][1] )
 
         colorfrom = pygame.Color( colormap[0][2] )
         colorto = pygame.Color( colormap[0][3] )
@@ -108,13 +109,15 @@ try:
         
         for spit in spits:
             spit.draw(screen)
+            if spit.move():
+                spits.remove(spit)
 
         scaledrotatedship = pygame.transform.scale(rot_center(ship,rot),(128,128))
         scaledrotatedship_rect = scaledrotatedship.get_rect()
         scaledrotatedship_rect.center = screen_rect.center
         screen.blit(scaledrotatedship, scaledrotatedship_rect)
+        spits.append(Spit(scaledrotatedship_rect.center,rot))
 
-        spits.append( Spit((900,400) ,rot+(random.random()*2) ) )
 
         pygame.display.update()
         dt = clock.tick(60)
