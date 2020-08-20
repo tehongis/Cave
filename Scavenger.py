@@ -5,9 +5,10 @@ import random
 import pygame
 from pygame.locals import *
 
-sc_size = (1920,1200)
-#sc_flags = pygame.FULLSCREEN
-sc_flags = 0
+#sc_size = (1920,1080)
+sc_size = (0,0)
+sc_flags = pygame.FULLSCREEN
+#sc_flags = 0
 sc_bits = 32
 
 colormap = (
@@ -25,14 +26,14 @@ class Spit():
         self.direction = direction
         self.loc[0] = loc[0]
         self.loc[1] = loc[1]
-        self.loc[0] = self.loc[0] + (32 * math.sin(direction) + 32 * math.cos(direction) )
+        self.loc[0] = self.loc[0] + (32 * math.sin(direction) - 32 * math.cos(direction) )
         self.loc[1] = self.loc[1] + (32 * math.cos(direction) + 32 * math.sin(direction) )
         self.life = 32
         self.color = (255,255,255)
 
     def move(self):
         self.loc[0] = self.loc[0] + math.sin(direction) - math.cos(direction)
-        self.loc[1] = self.loc[1] - math.sin(direction) + math.cos(direction)
+        self.loc[1] = self.loc[1] + math.cos(direction) + math.sin(direction)
         self.life = self.life - 1
         if self.life < 0:
             del self
@@ -60,9 +61,12 @@ def lerp(a,b,t):
 spits = []
 
 try:
+    os.environ['SDL_VIDEO_CENTERED'] = '1'
+
     pygame.init()
     pygame.mixer.init()
     screen=pygame.display.set_mode(sc_size,sc_flags,sc_bits)
+
     screen_rect=screen.get_rect()
     scx = screen.get_width() / 2 
     scy = screen.get_height() / 2 
