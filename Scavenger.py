@@ -34,13 +34,22 @@ class Obj():
         rotsurf_rect.center = self.loc
         target_surf.blit(rotated_surf, rotsurf_rect)
 
+    def set_angle(self,angle):
+        self.angle = angle
+
     def get_angle(self,other):
         return(math.degrees( math.atan2( (self.loc[1] - other.loc[1]), (other.loc[0] - self.loc[0]) ) ) )
 
     def get_distance(self,other):
         difx = (self.loc[0] - other.loc[0])
         dify = (self.loc[1] - other.loc[1])
-        return( math.sqrt( difx*difx +  dify*dify ) ) 
+        return( math.sqrt( difx*difx +  dify*dify ) )
+
+    def push(self,force,angle):
+        xforce = force * math.cos(angle) + force * math.sin(angle)
+        yforce = force * math.sin(angle) - force * math.cos(angle)
+        self.loc[0] = self.loc[0] + xforce
+        self.loc[1] = self.loc[1] + yforce
 
 class Spit():
 
@@ -105,7 +114,7 @@ try:
     maptiles_rect = maptiles.get_rect()
 
     ship = Obj(screen_rect.center,0,ship_surf)
-    box = Obj((800,1000),0,box_surf)
+    box = Obj([800,1000],0,box_surf)
     
     clock = pygame.time.Clock()
 
@@ -133,6 +142,10 @@ try:
 
         spits.append(Spit(screen_rect.center,rot))
 
+        box.set_angle( ship.get_angle(box) )
+        #print(ship.get_distance(box))
+        box.push(1.3,0)
+
         screen.fill( colormap[0][1] )
 
         colorfrom = pygame.Color( colormap[0][2] )
@@ -147,8 +160,6 @@ try:
         box.draw(screen)
         ship.draw(screen)
 
-        print(ship.get_angle(box))
-        print(ship.get_distance(box))
         
         for spit in spits:
             spit.draw(screen)
