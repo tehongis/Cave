@@ -19,6 +19,29 @@ colormap = (
         (0xd8add9,0x9eafa5,0x889573,0xa1754c,0x001803)
 )
 
+class Obj():
+
+    def __init__(self,loc,angle,surf):
+        self.loc = loc
+        self.angle = angle
+        self.surf = surf
+        self.scalediv = 3
+
+    def draw(self,target_surf):
+        (scalex,scaley)=( int(self.surf.get_width()/self.scalediv), int(self.surf.get_height()/self.scalediv) )
+        rotated_surf = pygame.transform.scale(rot_center(self.surf,self.angle),(scalex,scaley))
+        rotsurf_rect = rotated_surf.get_rect()
+        rotsurf_rect.center = self.loc
+        target_surf.blit(rotated_surf, rotsurf_rect)
+
+    def get_angle(self,other):
+        return(math.degrees( math.atan2( (self.loc[1] - other.loc[1]), (other.loc[0] - self.loc[0]) ) ) )
+
+    def get_distance(self,other):
+        difx = (self.loc[0] - other.loc[0])
+        dify = (self.loc[1] - other.loc[1])
+        return( math.sqrt( difx*difx +  dify*dify ) ) 
+
 class Spit():
 
     def __init__(self,loc,angle):
@@ -46,10 +69,6 @@ class Spit():
     def draw(self,screen):
         pygame.draw.line(screen,self.color,self.lastloc,self.loc,2)
     
-
-class obj:
-    def _init_(self):
-        pass
 
 def rot_center(image, angle):
     """rotate an image while keeping its center and size - Needs square images"""
@@ -79,9 +98,14 @@ try:
     pygame.mixer.music.load(os.path.join('music','fsm-team-escp-quasarise.mp3'))
     pygame.mixer.music.play(loops=-1)
 
-    ship = pygame.image.load(os.path.join('graphics','ship.png')).convert_alpha()
+    ship_surf = pygame.image.load(os.path.join('graphics','ship.png')).convert_alpha()
+    box_surf = pygame.image.load(os.path.join('graphics','RTS_crate.png')).convert_alpha()
+
     maptiles = pygame.image.load(os.path.join('graphics','tiles.png')).convert_alpha()
     maptiles_rect = maptiles.get_rect()
+
+    ship = Obj(screen_rect.center,0,ship_surf)
+    box = Obj((800,1000),0,box_surf)
     
     clock = pygame.time.Clock()
 
@@ -96,9 +120,18 @@ try:
         if keys[pygame.K_ESCAPE]:
             running = False
 
-        rot = rot + 0.1
+        (mx,my)=pygame.mouse.get_pos()
+
+        rot = rot + 1
         if rot > 360:
             rot = rot - 360
+
+
+        for spit in spits:
+            if spit.move():
+                spits.remove(spit)
+
+        spits.append(Spit(screen_rect.center,rot))
 
         screen.fill( colormap[0][1] )
 
@@ -110,18 +143,20 @@ try:
 
         maptiles_rect.center = screen_rect.center
         screen.blit(maptiles, [0,0])
+       
+        box.draw(screen)
+        ship.draw(screen)
+
+        print(ship.get_angle(box))
+        print(ship.get_distance(box))
         
         for spit in spits:
             spit.draw(screen)
-            if spit.move():
-                spits.remove(spit)
 
-        scaledrotatedship = pygame.transform.scale(rot_center(ship,rot),(128,128))
-        scaledrotatedship_rect = scaledrotatedship.get_rect()
-        scaledrotatedship_rect.center = screen_rect.center
-        screen.blit(scaledrotatedship, scaledrotatedship_rect)
-        spits.append(Spit(scaledrotatedship_rect.center,rot))
 
+        pygame.draw.line(screen,colormap[0][3],(mx,my-20),(mx,my+20))
+        pygame.draw.line(screen,colormap[0][3],(mx-20,my),(mx+20,my))
+        pygame.draw.line(screen,colormap[0][3],ship.loc,box.loc,2)
 
         pygame.display.update()
         dt = clock.tick(60)
